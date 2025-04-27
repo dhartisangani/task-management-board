@@ -1,3 +1,3 @@
 export const API = {
-  TASKS: "http://localhost:5001/tasks",
+  TASKS: "https://jsonplaceholder.typicode.com/posts",
 };

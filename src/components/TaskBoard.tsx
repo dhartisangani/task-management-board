@@ -22,7 +22,7 @@ function TaskBoard() {
             id: item.id.toString(),
             title: item.title,
             description: item.description || "No description",
-            status: item.status || "todo",
+            status: "todo", 
         }));
         setTasks(mappedTasks);
     };
@@ -40,11 +40,11 @@ function TaskBoard() {
     const handleDragEnd = async (result: DropResult) => {
         const { source, destination, draggableId } = result;
         if (!destination) return;
-    
+
         if (source.droppableId === destination.droppableId && source.index === destination.index) {
             return;
         }
-    
+
         const draggedTask = tasks.find((task) => task.id === draggableId);
         if (!draggedTask) return;
         let updatedTasks = Array.from(tasks);
@@ -64,18 +64,18 @@ function TaskBoard() {
             }
             insertAt = i + 1;
         }
-    
+
         updatedTasks.splice(insertAt, 0, newTask);
-    
+
         setTasks(updatedTasks);
-    
+
         try {
             const res = await fetch(`${API.TASKS}/${draggableId}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ status: newTask.status }),
             });
-    
+
             if (!res.ok) {
                 throw new Error("Failed to update task status on the server");
             }

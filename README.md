@@ -21,6 +21,3 @@ Make sure you have `Node.js` and `npm` installed. You can download Node.js from 
 npm install 
 thenÍ
 npm run dev
-
-To simulate a backend, run the JSON server with
-npm run start:api

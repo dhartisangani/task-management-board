@@ -39,29 +39,41 @@ function TaskBoard() {
 
     const handleDragEnd = async (result: DropResult) => {
         const { source, destination, draggableId } = result;
-        if (!destination || (source.droppableId === destination.droppableId && source.index === destination.index)) {
+        if (!destination) return;
+    
+        if (source.droppableId === destination.droppableId && source.index === destination.index) {
             return;
         }
+    
         const draggedTask = tasks.find((task) => task.id === draggableId);
         if (!draggedTask) return;
-        const filteredTasks = tasks.filter((task) => task.id !== draggableId);
-        const updatedTask = {
+        let updatedTasks = Array.from(tasks);
+        updatedTasks = updatedTasks.filter((task) => task.id !== draggableId);
+        const newTask = {
             ...draggedTask,
             status: destination.droppableId as "todo" | "inprogress" | "done",
         };
+        let insertAt = 0;
+        for (let i = 0, count = 0; i < updatedTasks.length; i++) {
+            if (updatedTasks[i].status === destination.droppableId) {
+                if (count === destination.index) {
+                    insertAt = i;
+                    break;
+                }
+                count++;
+            }
+            insertAt = i + 1;
+        }
     
-        const newTasks = [
-            ...filteredTasks.slice(0, destination.index),
-            updatedTask, 
-            ...filteredTasks.slice(destination.index), 
-        ];
-
-        setTasks(newTasks);
+        updatedTasks.splice(insertAt, 0, newTask);
+    
+        setTasks(updatedTasks);
+    
         try {
             const res = await fetch(`${API.TASKS}/${draggableId}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ status: updatedTask.status }),
+                body: JSON.stringify({ status: newTask.status }),
             });
     
             if (!res.ok) {
@@ -69,9 +81,10 @@ function TaskBoard() {
             }
         } catch (error) {
             console.error("Error updating task status:", error);
-            setTasks(tasks);
+            setTasks(tasks); 
         }
     };
+    
 
     const handleDeleteTask = async (id: string) => {
         await fetch(`${API.TASKS}/${id}`, {

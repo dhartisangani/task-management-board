@@ -1,6 +1,6 @@
 ## Preview
 
-Preview the example live on [https://kanban-ui.vercel.app](https://kanban-ui.vercel.app)
+Preview the example live on [https://task-management-board.vercel.app](https://kanban-ui.vercel.app)
 
 ## Deploy your own
 

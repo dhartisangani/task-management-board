@@ -10,7 +10,7 @@ This is a simple task management board built with Next.js and Tailwind CSS, impl
 
 ## Preview
 
-You can preview the app live on [Task Management Board](https://task-management-board.vercel.app).
+You can preview the app live on [Task Management Board](https://task-management-board-git-main-dhartisanganis-projects.vercel.app/).
 
 ### Prerequisites
 Make sure you have `Node.js` and `npm` installed. You can download Node.js from [here](https://nodejs.org/).

@@ -18,7 +18,7 @@ function TaskBoard() {
     const fetchTasks = async () => {
         const res = await fetch(`${API.TASKS}?_limit=15`);
         const data = await res.json();
-        const mappedTasks = data.map((item: any) => ({
+        const mappedTasks = data.map((item:Task ) => ({
             id: item.id.toString(),
             title: item.title,
             description: item.description || "No description",
@@ -55,12 +55,7 @@ function TaskBoard() {
             updatedTask, 
             ...filteredTasks.slice(destination.index), 
         ];
-        const updatedColumns = newTasks.reduce((acc: { [key: string]: Task[] }, task) => {
-            acc[task.status] = acc[task.status] || [];
-            acc[task.status].push(task);
-            return acc;
-        }, {});
-    
+
         setTasks(newTasks);
         try {
             const res = await fetch(`${API.TASKS}/${draggableId}`, {

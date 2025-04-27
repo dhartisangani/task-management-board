@@ -1,0 +1,40 @@
+{
+  "tasks": [
+    {
+      "id": "6",
+      "title": "Set Up CI/CD",
+      "description": "Configure continuous integration and deployment pipelines.",
+      "status": "inprogress"
+    },
+    {
+      "id": "edb857fd-c64e-4fb7-9e97-37f15674cb7c",
+      "title": "Test Task 1",
+      "description": "Edit test cases for the new feature.",
+      "status": "done"
+    },
+    {
+      "id": "977d771a-9de4-454e-821d-ae174edd0e7b",
+      "title": "Task 2",
+      "description": "Research the best practices for CI/CD integration.",
+      "status": "todo"
+    },
+    {
+      "id": "f724d9fc-3191-4678-b0e9-553216daa3ce",
+      "title": "Task 3",
+      "description": "Create a documentation outline for the new release.",
+      "status": "todo"
+    },
+    {
+      "id": "a111a3f8-7752-4cfa-b0d7-c56fdbb63a90",
+      "title": "Bug Fix 1",
+      "description": "Fix the issue with the login page after the last update.",
+      "status": "done"
+    },
+    {
+      "id": "d897da7d-f60b-4569-9a5c-6a2a2d83943b",
+      "title": "UI Update",
+      "description": "Update the user interface for the dashboard.",
+      "status": "inprogress"
+    }
+  ]
+}

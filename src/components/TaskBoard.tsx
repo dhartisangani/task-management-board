@@ -3,11 +3,10 @@
 import { useEffect, useState } from "react";
 import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
 import TaskCard from "@/components/TaskCard";
-import { v4 as uuidv4 } from "uuid";
-import AddTaskModal from "@/components/form/AddTaskModal";
 import { PlusIcon } from "@heroicons/react/16/solid";
+import AddTaskModal from "@/components/form/AddTaskModal";
 import { Task } from "@/types/Types";
-import { API, dummyTasks } from "@/constants/api";
+import { API } from "@/constants/api";
 
 const statusList = ["todo", "inprogress", "done"];
 
@@ -22,8 +21,8 @@ function TaskBoard() {
         const mappedTasks = data.map((item: any) => ({
             id: item.id.toString(),
             title: item.title,
-            description: "No description",
-            status: item.completed ? "done" : "todo",
+            description: item.description || "No description",
+            status: item.status || "todo",
         }));
         setTasks(mappedTasks);
     };
@@ -37,45 +36,53 @@ function TaskBoard() {
         setEditTask(task);
         setShowModal(true);
     };
+
     const handleDragEnd = async (result: DropResult) => {
         const { source, destination, draggableId } = result;
-        if (!destination) return;
-      
-        if (source.droppableId === destination.droppableId && source.index === destination.index) {
-          return; 
+        if (!destination || (source.droppableId === destination.droppableId && source.index === destination.index)) {
+            return;
         }
-      
-        const draggedTask = tasks.find(task => task.id === draggableId);
+        const draggedTask = tasks.find((task) => task.id === draggableId);
         if (!draggedTask) return;
-      
-        let newTasks = Array.from(tasks.filter(task => task.id !== draggableId));
-      
-        const updatedTask = { ...draggedTask, status: destination.droppableId as "todo" | "inprogress" | "done" };
-      
-        // Find the index where to insert
-        const tasksInDestination = newTasks.filter(task => task.status === destination.droppableId);
-        const beforeTasks = newTasks.filter(task => task.status !== destination.droppableId);
-      
-        tasksInDestination.splice(destination.index, 0, updatedTask);
-      
+        const filteredTasks = tasks.filter((task) => task.id !== draggableId);
+        const updatedTask = {
+            ...draggedTask,
+            status: destination.droppableId as "todo" | "inprogress" | "done",
+        };
     
-        newTasks = [...beforeTasks, ...tasksInDestination];
-      
+        const newTasks = [
+            ...filteredTasks.slice(0, destination.index),
+            updatedTask, 
+            ...filteredTasks.slice(destination.index), 
+        ];
+        const updatedColumns = newTasks.reduce((acc: { [key: string]: Task[] }, task) => {
+            acc[task.status] = acc[task.status] || [];
+            acc[task.status].push(task);
+            return acc;
+        }, {});
+    
         setTasks(newTasks);
-      
-        // (optional) sync API
-        await fetch(`${API.TASKS}/${draggableId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: destination.droppableId }),
-        });
-      };
-      
+        try {
+            const res = await fetch(`${API.TASKS}/${draggableId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: updatedTask.status }),
+            });
+    
+            if (!res.ok) {
+                throw new Error("Failed to update task status on the server");
+            }
+        } catch (error) {
+            console.error("Error updating task status:", error);
+            setTasks(tasks);
+        }
+    };
+
     const handleDeleteTask = async (id: string) => {
         await fetch(`${API.TASKS}/${id}`, {
             method: "DELETE",
         });
-        setTasks(prev => prev.filter(task => task.id !== id));
+        setTasks((prev) => prev.filter((task) => task.id !== id));
     };
 
     const handleSaveTask = async (taskData: Task) => {
@@ -85,32 +92,23 @@ function TaskBoard() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(taskData),
             });
-            setTasks(prev => prev.map(task => (task.id === taskData.id ? taskData : task)));
+            setTasks((prev) => prev.map((task) => (task.id === taskData.id ? taskData : task)));
             setEditTask(null);
         } else {
-            await fetch(API.TASKS, {
+            const res = await fetch(API.TASKS, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(taskData),
             });
-            setTasks(prev => [...prev, taskData]);
+            const newTask = await res.json();
+            setTasks((prev) => [...prev, newTask]);
         }
         setShowModal(false);
     };
 
     useEffect(() => {
-        const storedTasks = localStorage.getItem("tasks");
-        if (storedTasks) {
-          setTasks(JSON.parse(storedTasks));
-        } else {
-          setTasks(dummyTasks); 
-          fetchTasks(); 
-        }
-      }, []);
-      
-    useEffect(() => {
-        localStorage.setItem("tasks", JSON.stringify(tasks));
-    }, [tasks]);
+        fetchTasks();
+    }, []);
 
     return (
         <div className="p-4 sm:p-8">
